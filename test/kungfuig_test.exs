@@ -16,6 +16,8 @@ defmodule KungfuigTest do
     System.put_env("KUNGFUIG_FOO", "42")
     assert_receive {:updated, %{system: %{"KUNGFUIG_FOO" => "42"}}}, 1_010
 
+    assert Kungfuig.config() == %{env: %{kungfuig: [foo: 42]}, system: %{"KUNGFUIG_FOO" => "42"}}
+
     Supervisor.stop(pid)
   end
 end
