@@ -10,6 +10,8 @@ defmodule Kungfuig.Supervisor do
 
   @impl true
   def init(opts) do
+    {blender, opts} = Keyword.pop(opts, :blender, Blender)
+
     {workers, opts} =
       Keyword.pop(opts, :workers, [
         {Backends.Env, callback: {Blender, {:call, :updated}}},
@@ -24,7 +26,7 @@ defmodule Kungfuig.Supervisor do
       end)
 
     children = [
-      Blender,
+      blender,
       {Manager, post_mortem: pid}
     ]
 

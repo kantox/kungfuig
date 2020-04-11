@@ -112,6 +112,24 @@ defmodule Kungfuig do
     end
   end
 
-  @spec config :: Kungfuig.t()
-  defdelegate config, to: Kungfuig.Blender, as: :state
+  @spec config(which :: atom() | [atom()] | nil) :: Kungfuig.t()
+  def config(which \\ nil) do
+    result =
+      Kungfuig.Supervisor
+      |> Supervisor.which_children()
+      |> Enum.find(&match?({_, _, :worker, _}, &1))
+      |> case do
+        {_blender, pid, :worker, _} when is_pid(pid) ->
+          GenServer.call(pid, :state)
+
+        other ->
+          raise inspect(other, label: "No Blender configured: ")
+      end
+
+    case which do
+      nil -> result.state
+      which when is_atom(which) -> Map.get(result.state, which, %{})
+      which when is_list(which) -> Map.take(result.state, which)
+    end
+  end
 end
