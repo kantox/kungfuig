@@ -1,5 +1,6 @@
 defmodule Kungfuig.Supervisor do
   @moduledoc false
+
   use Supervisor
 
   alias Kungfuig.{Backends, Blender, Manager}

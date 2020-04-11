@@ -84,7 +84,7 @@ defmodule Vela.MixProject do
 
   defp docs do
     [
-      main: "readme",
+      main: "Kungfuig",
       source_ref: "v#{@version}",
       canonical: "http://#{@private_hex}hexdocs.pm/#{@app}",
       logo: "stuff/#{@app}-48x48.png",

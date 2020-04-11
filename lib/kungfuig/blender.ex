@@ -1,5 +1,6 @@
 defmodule Kungfuig.Blender do
   @moduledoc false
+
   use Kungfuig
 
   @spec state :: Kungfuig.t()

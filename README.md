@@ -1,21 +1,23 @@
-# Kungfuig
+# ![Kungfuig](https://raw.githubusercontent.com/kantox/kungfuig/master/stuff/kungfuig-48x48.png) Kungfuig
 
-**TODO: Add description**
+## Intro
+
+Live config supporting many different backends.
+
+**Kungfuig** (_pronounced:_ [ˌkʌŋˈfig]) provides an easy way to plug
+live configuration into everything.
+
+It provides backends for `env` and `system` and supports custom backends.
 
 ## Installation
-
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `kungfuig` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
   [
-    {:kungfuig, "~> 0.1.0"}
+    {:kungfuig, "~> 0.1"}
   ]
 end
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/kungfuig](https://hexdocs.pm/kungfuig).
+## [Documentation](https://hexdocs.pm/kungfuig)
 
