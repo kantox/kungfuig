@@ -1,6 +1,23 @@
 defmodule Kungfuig do
   @moduledoc """
   The behaviour defining the dynamic config provider.
+
+  `Kungfuig` provides a plugagble drop-in support for live configurations.
+
+  ### Examples
+
+      Kungfuig.Supervisor.start_link()
+      Kungfuig.config()
+      #⇒ %{env: %{kungfuig: []}, system: %{}}
+
+      Kungfuig.config(:env)
+      #⇒ %{kungfuig: []}
+
+      Application.put_env(:kungfuig, :foo, 42)
+      Kungfuig.config(:env)
+      #⇒ %{kungfuig: [foo: 42]}
+
+  The configuration is frequently updated.
   """
 
   @typedoc "The config map to be updated and exposed through callback"
@@ -57,15 +74,17 @@ defmodule Kungfuig do
 
         {start_options, opts} = Keyword.pop(opts, :start_options, [])
 
+        opts =
+          opts
+          |> Keyword.put_new(:interval, unquote(@default_interval))
+          |> Keyword.put_new(:callback, fn _ -> :ok end)
+
         case Keyword.get(opts, :callback) do
-          nil -> :ok
           {target, {type, name}} when type in [:call, :cast, :info] and is_atom(name) -> :ok
           {m, f} when is_atom(m) and is_atom(f) -> :ok
           f when is_function(f, 1) -> :ok
           other -> raise "Expected callable, got: " <> inspect(other)
         end
-
-        opts = Keyword.put_new(opts, :interval, unquote(@default_interval))
 
         start_options =
           if unquote(anonymous),
@@ -90,8 +109,16 @@ defmodule Kungfuig do
 
       @impl GenServer
       def handle_continue(:update, %Kungfuig{__meta__: opts, state: state} = config) do
-        state = update_config(config)
-        unless is_nil(opts[:callback]), do: send_callback(opts[:callback], state)
+        state =
+          case update_config(config) do
+            ^state ->
+              state
+
+            state ->
+              send_callback(opts[:callback], state)
+              state
+          end
+
         Process.send_after(self(), :update, opts[:interval])
         {:noreply, %Kungfuig{config | state: state}}
       end

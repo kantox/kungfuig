@@ -6,6 +6,13 @@ defmodule Kungfuig.Blender do
   def state, do: GenServer.call(Kungfuig.Blender, :state)
 
   @impl GenServer
-  def handle_call({:updated, %{} = updated}, _from, %Kungfuig{state: state} = config),
-    do: {:reply, :ok, %Kungfuig{config | state: Map.merge(state, updated)}}
+  def handle_call(
+        {:updated, %{} = updated},
+        _from,
+        %Kungfuig{__meta__: meta, state: state} = config
+      ) do
+    state = Map.merge(state, updated)
+    send_callback(meta[:callback], state)
+    {:reply, :ok, %Kungfuig{config | state: state}}
+  end
 end

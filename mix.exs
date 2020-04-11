@@ -61,6 +61,11 @@ defmodule Vela.MixProject do
   defp description do
     """
     Live config supporting many different backends.
+
+    **Kungfuig** (_pronounced:_ [ˌkʌŋˈfig]) provides a drastically easy way to plug
+    live configuration into everything.
+
+    It provides backends for `env` and `system` and supports custom backends.
     """
   end
 

@@ -13,10 +13,14 @@ defmodule Kungfuig.Supervisor do
     {blender, opts} = Keyword.pop(opts, :blender, Blender)
 
     {workers, opts} =
-      Keyword.pop(opts, :workers, [
-        {Backends.Env, callback: {Blender, {:call, :updated}}},
-        {Backends.System, callback: {Blender, {:call, :updated}}}
-      ])
+      Keyword.pop(
+        opts,
+        :workers,
+        Application.get_env(:kungfuig, :backends, [
+          {Backends.Env, callback: {Blender, {:call, :updated}}},
+          {Backends.System, callback: {Blender, {:call, :updated}}}
+        ])
+      )
 
     {:ok, pid} =
       Task.start_link(fn ->
