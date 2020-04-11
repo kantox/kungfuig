@@ -111,4 +111,7 @@ defmodule Kungfuig do
       defp send_callback(f, state) when is_function(f, 1), do: f.(state)
     end
   end
+
+  @spec config :: Kungfuig.t()
+  defdelegate config, to: Kungfuig.Blender, as: :state
 end
