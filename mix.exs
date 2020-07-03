@@ -1,9 +1,9 @@
-defmodule Vela.MixProject do
+defmodule Kungfuig.MixProject do
   use Mix.Project
 
   @app :kungfuig
   @name "Kungfuig"
-  @version "0.1.0"
+  @version "0.1.1"
   @owner "kantox"
   @maintainers ["Aleksei Matiushkin"]
   @private_hex ""
