@@ -1,4 +1,4 @@
-# ![Kungfuig](https://raw.githubusercontent.com/kantox/kungfuig/master/stuff/kungfuig-48x48.png) Kungfuig
+# ![Kungfuig](https://raw.githubusercontent.com/kantox/kungfuig/master/stuff/kungfuig-48x48.png) Kungfuig    [![Kantox ❤ OSS](https://img.shields.io/badge/❤-kantox_oss-informational.svg)](https://kantox.com/)  ![Test](https://github.com/kantox/kungfuig/workflows/Test/badge.svg)  ![Dialyzer](https://github.com/kantox/kungfuig/workflows/Dialyzer/badge.svg)
 
 ## Intro
 
@@ -20,4 +20,3 @@ end
 ```
 
 ## [Documentation](https://hexdocs.pm/kungfuig)
-
