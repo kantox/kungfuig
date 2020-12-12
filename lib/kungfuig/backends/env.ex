@@ -1,15 +1,13 @@
 defmodule Kungfuig.Backends.Env do
   @moduledoc false
 
-  use Kungfuig
+  use Kungfuig.Backend
 
-  @impl Kungfuig
-  def update_config(%Kungfuig{__meta__: meta, state: %{} = state}) do
-    mine =
-      meta
-      |> Keyword.get(:for, [:kungfuig])
-      |> Enum.reduce(%{}, &Map.put(&2, &1, Application.get_all_env(&1)))
-
-    Map.put(state, :env, mine)
+  @impl Kungfuig.Backend
+  def get(meta) do
+    {:ok,
+     meta
+     |> Keyword.get(:for, [:kungfuig])
+     |> Enum.reduce(%{}, &Map.put(&2, &1, Application.get_all_env(&1)))}
   end
 end

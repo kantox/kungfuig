@@ -64,7 +64,7 @@ defmodule Kungfuig do
   defmacro __using__(opts) do
     {anonymous, opts} = Keyword.pop(opts, :anonymous, false)
 
-    quote location: :keep do
+    quote location: :keep, generated: true do
       use GenServer
       @behaviour Kungfuig
 
