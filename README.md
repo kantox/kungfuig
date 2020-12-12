@@ -89,6 +89,7 @@ end
 
 ## Changelog
 
+- **`0.3.0`** — allow validation through `NimbleOptions` (per backend and global)
 - **`0.2.0`** — scaffold for backends + several callbacks (and the automatic one for `Blender`)
 
 ## [Documentation](https://hexdocs.pm/kungfuig)
