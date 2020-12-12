@@ -24,6 +24,8 @@ defmodule Kungfuig.Backend do
              __MODULE__ |> Module.split() |> List.last() |> Macro.underscore() |> String.to_atom()
            )
 
+      @report Keyword.get(unquote(opts), :report, :none)
+
       @impl Kungfuig.Backend
       def key, do: @key
 
@@ -31,7 +33,16 @@ defmodule Kungfuig.Backend do
       def transform(any), do: {:ok, any}
 
       @impl Kungfuig.Backend
-      def report(_any), do: :ok
+      case @report do
+        :logger ->
+          require Logger
+
+          def report(any),
+            do: Logger.info("Failed to retrieve config in #{key}. Error: #{inspect(error)}.")
+
+        _ ->
+          def report(_any), do: :ok
+      end
 
       defoverridable Kungfuig.Backend
 
@@ -44,7 +55,6 @@ defmodule Kungfuig.Backend do
           Map.put(state, key(), result)
         else
           {:error, error} ->
-            IO.inspect(error)
             report(error)
             state
         end
