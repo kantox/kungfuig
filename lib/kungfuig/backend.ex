@@ -63,8 +63,6 @@ defmodule Kungfuig.Backend do
         end
       end
 
-      @spec smart_validate(validator :: nil | module(), options :: keyword()) ::
-              {:ok, keyword()} | {:error, any()}
       defp smart_validate(nil, options), do: {:ok, options}
       defp smart_validate(Kungfuig.Validators.Void, options), do: {:ok, options}
 
@@ -73,7 +71,6 @@ defmodule Kungfuig.Backend do
              do: {:ok, %{options | key() => validated}}
       end
 
-      @spec report_error(error :: any()) :: :ok
       defp report_error(error), do: report(error)
     end
   end

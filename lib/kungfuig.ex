@@ -117,10 +117,10 @@ defmodule Kungfuig do
           ) do
         state =
           with new_state <- update_config(config),
-               {:ok, new_state} <- smart_validate(opts[:validator], new_state),
-               if(previous != new_state,
-                 do: opts |> Keyword.get_values(:callback) |> send_callback(new_state)
-               ) do
+               {:ok, new_state} <- smart_validate(opts[:validator], new_state) do
+            if previous != new_state,
+              do: opts |> Keyword.get_values(:callback) |> send_callback(new_state)
+
             new_state
           else
             {:error, error} ->
@@ -136,8 +136,6 @@ defmodule Kungfuig do
       def handle_call(:state, _from, %Kungfuig{} = state),
         do: {:reply, state, state}
 
-      @spec send_callback(Kungfuig.callback() | [Kungfuig.callback()], Kungfuig.config()) :: :ok
-
       defp send_callback(nil, _state), do: :ok
 
       defp send_callback(many, state) when is_list(many),
@@ -152,7 +150,7 @@ defmodule Kungfuig do
       defp send_callback({m, f}, state), do: apply(m, f, [state])
       defp send_callback(f, state) when is_function(f, 1), do: f.(state)
 
-      @spec smart_validate(validator :: nil | module(), options :: keyword()) ::
+      @spec smart_validate(validator :: nil | module(), options :: map() | keyword()) ::
               {:ok, keyword()} | {:error, any()}
       defp smart_validate(nil, options), do: {:ok, options}
       defp smart_validate(Kungfuig.Validators.Void, options), do: {:ok, options}
