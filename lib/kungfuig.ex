@@ -52,12 +52,13 @@ defmodule Kungfuig do
   @type t :: %{
           __struct__: Kungfuig,
           __meta__: [option()],
+          __previous__: config(),
           state: config()
         }
 
   @default_interval 1_000
 
-  defstruct __meta__: [], state: %{}
+  defstruct __meta__: [], __previous__: %{}, state: %{}
 
   @doc false
   @spec __using__(opts :: [option()]) :: tuple()
@@ -74,15 +75,13 @@ defmodule Kungfuig do
 
         {start_options, opts} = Keyword.pop(opts, :start_options, [])
 
-        opts =
-          opts
-          |> Keyword.put_new(:interval, unquote(@default_interval))
-          |> Keyword.put_new(:callback, fn _ -> :ok end)
+        opts = Keyword.put_new(opts, :interval, unquote(@default_interval))
 
-        case Keyword.get(opts, :callback) do
-          {target, {type, name}} when type in [:call, :cast, :info] and is_atom(name) -> :ok
-          {m, f} when is_atom(m) and is_atom(f) -> :ok
-          f when is_function(f, 1) -> :ok
+        case Keyword.get_values(opts, :callback) do
+          [{target, {type, name}} | _] when type in [:call, :cast, :info] and is_atom(name) -> :ok
+          [{m, f} | _] when is_atom(m) and is_atom(f) -> :ok
+          [f | _] when is_function(f, 1) -> :ok
+          [] -> :ok
           other -> raise "Expected callable, got: " <> inspect(other)
         end
 
@@ -108,26 +107,30 @@ defmodule Kungfuig do
         do: {:noreply, state, {:continue, :update}}
 
       @impl GenServer
-      def handle_continue(:update, %Kungfuig{__meta__: opts, state: state} = config) do
-        state =
-          case update_config(config) do
-            ^state ->
-              state
+      def handle_continue(
+            :update,
+            %Kungfuig{__meta__: opts, __previous__: previous, state: state} = config
+          ) do
+        state = update_config(config)
 
-            state ->
-              send_callback(opts[:callback], state)
-              state
-          end
+        if previous != state,
+          do: opts |> Keyword.get_values(:callback) |> send_callback(state)
 
         Process.send_after(self(), :update, opts[:interval])
-        {:noreply, %Kungfuig{config | state: state}}
+        {:noreply, %Kungfuig{config | __previous__: state, state: state}}
       end
 
       @impl GenServer
       def handle_call(:state, _from, %Kungfuig{} = state),
         do: {:reply, state, state}
 
-      @spec send_callback(Kungfuig.callback(), Kungfuig.config()) :: :ok
+      @spec send_callback(Kungfuig.callback() | [Kungfuig.callback()], Kungfuig.config()) :: :ok
+
+      defp send_callback(nil, _state), do: :ok
+
+      defp send_callback(many, state) when is_list(many),
+        do: Enum.each(many, &send_callback(&1, state))
+
       defp send_callback({target, {:info, m}}, state),
         do: send(target, {m, state})
 

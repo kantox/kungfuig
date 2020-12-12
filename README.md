@@ -19,4 +19,72 @@ def deps do
 end
 ```
 
+## Using
+
+**Kungfuig** is the easy way to read the external configuration from sources that are not controlled by the application using it, such as _Redis_, or _Database_.
+
+Here is the example of backend implementation for the config read from external _MySQL_.
+
+```elixir
+defmodule MyApp.Kungfuig.MySQL do
+  @moduledoc false
+
+  use Kungfuig.Backend
+
+  @impl Kungfuig.Backend
+  def get(_meta) do
+    with {:ok, host} <- System.fetch_env("MYSQL_HOST"),
+         {:ok, db} <- System.fetch_env("MYSQL_DB"),
+         {:ok, user} <- System.fetch_env("MYSQL_USER"),
+         {:ok, pass} <- System.fetch_env("MYSQL_PASS"),
+         {:ok, pid} when is_pid(pid) <-
+           MyXQL.start_link(hostname: host, database: db, username: user, password: pass),
+         result <- MyXQL.query!(pid, "SELECT * FROM some_table") do
+      GenServer.stop(pid)
+
+      result =
+        result.rows
+        |> Flow.from_enumerable()
+        |> Flow.map(fn [_, field1, field2, _, _] -> {field1, field2} end)
+        |> Flow.partition(key: &elem(&1, 0))
+        |> Flow.reduce(fn -> %{} end, fn {field1, field2}, acc ->
+          Map.update(
+            acc,
+            String.to_existing_atom(field1),
+            [field2],
+            &[field2 | &1]
+          )
+        end)
+
+      Logger.info("Loaded #{Enum.count(result)} values from " <> host)
+
+      {:ok, result}
+    else
+      :error ->
+        Logger.warn("Skipped reconfig, one of MYSQL_{HOST,DB,USER,PASS} is missing")
+        :ok
+
+      error ->
+        Logger.error("Reconfiguring failed. Error: " <> inspect(error))
+        {:error, error}
+    end
+  end
+end
+```
+
+## Testing
+
+Simply implement a stub returning an expected config and you are all set.
+
+```elixir
+defmodule MyApp.Kungfuig.Stub do
+  @moduledoc false
+
+  use Kungfuig.Backend
+
+  @impl Kungfuig.Backend
+  def get(_meta), do: %{foo: :bar, baz: [42]}
+end
+```
+
 ## [Documentation](https://hexdocs.pm/kungfuig)

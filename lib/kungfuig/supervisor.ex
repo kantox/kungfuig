@@ -13,15 +13,27 @@ defmodule Kungfuig.Supervisor do
   def init(opts) do
     {blender, opts} = Keyword.pop(opts, :blender, Blender)
 
+    {blender, blender_opts} =
+      case blender do
+        module when is_atom(module) -> {module, []}
+        {module, opts} -> {module, opts}
+      end
+
     {workers, opts} =
       Keyword.pop(
         opts,
         :workers,
-        Application.get_env(:kungfuig, :backends, [
-          {Backends.Env, callback: {Blender, {:call, :updated}}},
-          {Backends.System, callback: {Blender, {:call, :updated}}}
-        ])
+        Application.get_env(:kungfuig, :backends, [Backends.Env, Backends.System])
       )
+
+    workers =
+      Enum.map(workers, fn
+        module when is_atom(module) ->
+          {module, callback: {blender, {:call, :updated}}}
+
+        {module, opts} ->
+          {module, [{:callback, {blender, {:call, :updated}}} | opts]}
+      end)
 
     {:ok, pid} =
       Task.start_link(fn ->
@@ -31,7 +43,7 @@ defmodule Kungfuig.Supervisor do
       end)
 
     children = [
-      blender,
+      {blender, blender_opts},
       {Manager, post_mortem: pid}
     ]
 
