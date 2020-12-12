@@ -40,6 +40,7 @@ defmodule Kungfuig.MixProject do
 
   defp deps do
     [
+      {:nimble_options, "~> 0.3"},
       # dev / test
       {:credo, "~> 1.0", only: [:dev, :ci]},
       {:dialyxir, "~> 1.0", only: [:dev, :test, :ci], runtime: false},
