@@ -4,7 +4,7 @@ defmodule Kungfuig.Blender do
   use Kungfuig
 
   @spec state :: Kungfuig.t()
-  def state, do: GenServer.call(Kungfuig.Blender, :state)
+  def state, do: GenServer.call(__MODULE__, :state)
 
   @impl GenServer
   def handle_call(

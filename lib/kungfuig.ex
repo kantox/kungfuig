@@ -57,6 +57,7 @@ defmodule Kungfuig do
         }
 
   @default_interval 1_000
+  @default_validator Kungfuig.Validators.Void
 
   defstruct __meta__: [], __previous__: %{}, state: %{}
 
@@ -75,7 +76,10 @@ defmodule Kungfuig do
 
         {start_options, opts} = Keyword.pop(opts, :start_options, [])
 
-        opts = Keyword.put_new(opts, :interval, unquote(@default_interval))
+        opts =
+          opts
+          |> Keyword.put_new(:interval, unquote(@default_interval))
+          |> Keyword.put_new(:validator, unquote(@default_validator))
 
         case Keyword.get_values(opts, :callback) do
           [{target, {type, name}} | _] when type in [:call, :cast, :info] and is_atom(name) -> :ok
@@ -111,10 +115,18 @@ defmodule Kungfuig do
             :update,
             %Kungfuig{__meta__: opts, __previous__: previous, state: state} = config
           ) do
-        state = update_config(config)
-
-        if previous != state,
-          do: opts |> Keyword.get_values(:callback) |> send_callback(state)
+        state =
+          with new_state <- update_config(config),
+               {:ok, new_state} <- smart_validate(opts[:validator], new_state),
+               if(previous != new_state,
+                 do: opts |> Keyword.get_values(:callback) |> send_callback(new_state)
+               ) do
+            new_state
+          else
+            {:error, error} ->
+              report_error(error)
+              state
+          end
 
         Process.send_after(self(), :update, opts[:interval])
         {:noreply, %Kungfuig{config | __previous__: state, state: state}}
@@ -139,6 +151,17 @@ defmodule Kungfuig do
 
       defp send_callback({m, f}, state), do: apply(m, f, [state])
       defp send_callback(f, state) when is_function(f, 1), do: f.(state)
+
+      @spec smart_validate(validator :: nil | module(), options :: keyword()) ::
+              {:ok, keyword()} | {:error, any()}
+      defp smart_validate(nil, options), do: {:ok, options}
+      defp smart_validate(Kungfuig.Validators.Void, options), do: {:ok, options}
+      defp smart_validate(validator, options), do: validator.validate(options)
+
+      @spec report_error(error :: any()) :: :ok
+      defp report_error(_error), do: :ok
+
+      defoverridable report_error: 1, smart_validate: 2
     end
   end
 

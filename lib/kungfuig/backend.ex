@@ -37,8 +37,11 @@ defmodule Kungfuig.Backend do
         :logger ->
           require Logger
 
-          def report(any),
-            do: Logger.info("Failed to retrieve config in #{key}. Error: #{inspect(error)}.")
+          def report(error),
+            do:
+              Logger.info(fn ->
+                "Failed to retrieve config in #{key()}. Error: #{inspect(error)}."
+              end)
 
         _ ->
           def report(_any), do: :ok
@@ -59,6 +62,19 @@ defmodule Kungfuig.Backend do
             state
         end
       end
+
+      @spec smart_validate(validator :: nil | module(), options :: keyword()) ::
+              {:ok, keyword()} | {:error, any()}
+      defp smart_validate(nil, options), do: {:ok, options}
+      defp smart_validate(Kungfuig.Validators.Void, options), do: {:ok, options}
+
+      defp smart_validate(validator, options) do
+        with {:ok, validated} <- validator.validate(options[key()]),
+             do: {:ok, %{options | key() => validated}}
+      end
+
+      @spec report_error(error :: any()) :: :ok
+      defp report_error(error), do: report(error)
     end
   end
 end
