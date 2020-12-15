@@ -6,7 +6,9 @@ defmodule Kungfuig.Supervisor do
   alias Kungfuig.{Backends, Blender, Manager}
 
   def start_link(opts \\ []) do
-    Supervisor.start_link(__MODULE__, opts, name: __MODULE__)
+    # Supervisor.start_link(__MODULE__, opts, name: __MODULE__)
+    {name, opts} = Keyword.pop(opts, :name, __MODULE__)
+    Supervisor.start_link(__MODULE__, opts, name: name)
   end
 
   @impl true

@@ -163,10 +163,11 @@ defmodule Kungfuig do
     end
   end
 
-  @spec config(which :: atom() | [atom()] | nil) :: Kungfuig.t()
-  def config(which \\ nil) do
+  @spec config(supervisor :: Supervisor.supervisor(), which :: atom() | [atom()] | nil) ::
+          Kungfuig.t()
+  def config(supervisor \\ Kungfuig.Supervisor, which \\ nil) do
     result =
-      Kungfuig.Supervisor
+      supervisor
       |> Supervisor.which_children()
       |> Enum.find(&match?({_, _, :worker, _}, &1))
       |> case do
