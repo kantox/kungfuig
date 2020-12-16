@@ -1,5 +1,6 @@
 defmodule Kungfuig.Test do
   use ExUnit.Case, async: false
+  import ExUnit.CaptureLog
   doctest Kungfuig
 
   test "custom target" do
@@ -22,7 +23,7 @@ defmodule Kungfuig.Test do
     System.put_env("KUNGFUIG_FOO", "42")
     assert_receive {:updated, %{system: %{"KUNGFUIG_FOO" => "42"}}}, 1_010
 
-    assert Kungfuig.config(:server_1) == %{
+    assert Kungfuig.config(:!, :server_1) == %{
              env: %{kungfuig: [foo: 42]},
              system: %{"KUNGFUIG_FOO" => "42"}
            }
@@ -49,8 +50,11 @@ defmodule Kungfuig.Test do
     assert_receive {:updated, %{env_transform: [foo_transform: :baz]}}, 120
     assert Kungfuig.config() == %{env_transform: [foo_transform: :baz]}
 
-    Application.put_env(:kungfuig, :foo_transform, %{bar: 42})
-    refute_receive({:updated, %{env_transform: [foo_transform: 42]}}, 120)
+    assert capture_log([level: :info], fn ->
+             Application.put_env(:kungfuig, :foo_transform, %{bar: 42})
+             refute_receive({:updated, %{env_transform: [foo_transform: 42]}}, 120)
+           end) =~ ~s|"expected :foo_transform to be an atom, got: 42", value: 42}|
+
     assert Kungfuig.config() == %{env_transform: [foo_transform: :baz]}
 
     Application.delete_env(:kungfuig, :foo_transform)
@@ -80,7 +84,7 @@ defmodule Kungfuig.Test do
     System.put_env("KUNGFUIG_BAR", "24")
     assert_receive {:updated, %{system: %{"KUNGFUIG_BAR" => "24"}}}, 1_010
 
-    assert Kungfuig.config(name) == %{
+    assert Kungfuig.config(nil, name) == %{
              env: %{kungfuig: [bar: 24]},
              system: %{"KUNGFUIG_BAR" => "24"}
            }

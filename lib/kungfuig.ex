@@ -163,9 +163,9 @@ defmodule Kungfuig do
     end
   end
 
-  @spec config(supervisor :: Supervisor.supervisor(), which :: atom() | [atom()] | nil) ::
+  @spec config(which :: atom() | [atom()], supervisor :: Supervisor.supervisor()) ::
           Kungfuig.t()
-  def config(supervisor \\ Kungfuig.Supervisor, which \\ nil) do
+  def config(which \\ :!, supervisor \\ Kungfuig.Supervisor) do
     result =
       supervisor
       |> Supervisor.which_children()
@@ -180,6 +180,7 @@ defmodule Kungfuig do
 
     case which do
       nil -> result.state
+      :! -> result.state
       which when is_atom(which) -> Map.get(result.state, which, %{})
       which when is_list(which) -> Map.take(result.state, which)
     end
