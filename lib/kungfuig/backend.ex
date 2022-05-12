@@ -15,25 +15,26 @@ defmodule Kungfuig.Backend do
 
   @doc false
   defmacro __using__(opts \\ []) do
-    quote location: :keep, generated: true do
+    quote location: :keep, generated: true, bind_quoted: [opts: opts] do
       @behaviour Kungfuig.Backend
 
-      @key Keyword.get(
-             unquote(opts),
-             :key,
-             __MODULE__ |> Module.split() |> List.last() |> Macro.underscore() |> String.to_atom()
-           )
+      {key, opts} =
+        Keyword.pop(
+          opts,
+          :key,
+          __MODULE__ |> Module.split() |> List.last() |> Macro.underscore() |> String.to_atom()
+        )
 
-      @report Keyword.get(unquote(opts), :report, :none)
+      {report, opts} = Keyword.pop(opts, :report, :none)
 
       @impl Kungfuig.Backend
-      def key, do: @key
+      def key, do: unquote(key)
 
       @impl Kungfuig.Backend
       def transform(any), do: {:ok, any}
 
       @impl Kungfuig.Backend
-      case @report do
+      case report do
         :logger ->
           require Logger
 
@@ -49,7 +50,8 @@ defmodule Kungfuig.Backend do
 
       defoverridable Kungfuig.Backend
 
-      use Kungfuig
+      @opts opts
+      use Kungfuig, @opts
 
       @impl Kungfuig
       def update_config(%Kungfuig{__meta__: meta, state: %{} = state}) do

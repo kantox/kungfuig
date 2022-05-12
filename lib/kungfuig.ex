@@ -56,17 +56,14 @@ defmodule Kungfuig do
           state: config()
         }
 
-  @default_interval 1_000
-  @default_validator Kungfuig.Validators.Void
-
   defstruct __meta__: [], __previous__: %{}, state: %{}
 
   @doc false
   @spec __using__(opts :: [option()]) :: tuple()
   defmacro __using__(opts) do
-    {anonymous, opts} = Keyword.pop(opts, :anonymous, false)
+    quote location: :keep, generated: true, bind_quoted: [opts: opts] do
+      {anonymous, opts} = Keyword.pop(opts, :anonymous, false)
 
-    quote location: :keep, generated: true do
       use GenServer
       @behaviour Kungfuig
 
@@ -78,8 +75,9 @@ defmodule Kungfuig do
 
         opts =
           opts
-          |> Keyword.put_new(:interval, unquote(@default_interval))
-          |> Keyword.put_new(:validator, unquote(@default_validator))
+          |> Keyword.put_new(:imminent, false)
+          |> Keyword.put_new(:interval, 1_000)
+          |> Keyword.put_new(:validator, Kungfuig.Validators.Void)
 
         case Keyword.get_values(opts, :callback) do
           [{target, {type, name}} | _] when type in [:call, :cast, :info] and is_atom(name) -> :ok
@@ -103,8 +101,14 @@ defmodule Kungfuig do
       defoverridable Kungfuig
 
       @impl GenServer
-      def init(%Kungfuig{} = state),
-        do: {:ok, state, {:continue, :update}}
+      def init(%Kungfuig{__meta__: meta} = state) do
+        if meta[:imminent] == true do
+          {:noreply, state} = handle_continue(:update, state)
+          {:ok, state}
+        else
+          {:ok, state, {:continue, :update}}
+        end
+      end
 
       @impl GenServer
       def handle_info(:update, %Kungfuig{} = state),
