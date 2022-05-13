@@ -89,7 +89,7 @@ end
 
 ## Changelog
 
-- **`0.4.1`** — allow `imminent: true` option to `Kungfuig.Backend`
+- **`0.4.2`** — allow `imminent: true` option to `Kungfuig.Backend`
 - **`0.4.0`** — allow named `Kungfuig.Supervisor` (thanks @vbroskas)
 - **`0.3.0`** — allow validation through `NimbleOptions` (per backend and global)
 - **`0.2.0`** — scaffold for backends + several callbacks (and the automatic one for `Blender`)

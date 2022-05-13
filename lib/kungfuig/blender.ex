@@ -1,7 +1,7 @@
 defmodule Kungfuig.Blender do
   @moduledoc false
 
-  use Kungfuig
+  use Kungfuig, imminent: true
 
   @spec state :: Kungfuig.t()
   def state, do: GenServer.call(__MODULE__, :state)
