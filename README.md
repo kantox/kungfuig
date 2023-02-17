@@ -89,6 +89,7 @@ end
 
 ## Changelog
 
+- **`0.4.3`** — fix a bug with hardcoded names (`Supervisor` and `Blender`)
 - **`0.4.2`** — allow `imminent: true` option to `Kungfuig.Backend`
 - **`0.4.0`** — allow named `Kungfuig.Supervisor` (thanks @vbroskas)
 - **`0.3.0`** — allow validation through `NimbleOptions` (per backend and global)

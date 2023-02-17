@@ -7,12 +7,20 @@ defmodule Kungfuig.Supervisor do
 
   def start_link(opts \\ []) do
     {name, opts} = Keyword.pop(opts, :name, __MODULE__)
-    Supervisor.start_link(__MODULE__, opts, name: name)
+    Supervisor.start_link(__MODULE__, Keyword.put(opts, :name, name), name: name)
   end
 
   @impl true
   def init(opts) do
-    {blender, opts} = Keyword.pop(opts, :blender, Blender)
+    {name, opts} = Keyword.pop(opts, :name)
+
+    default_blender =
+      case name do
+        atom when is_atom(atom) -> {Blender, name: Module.concat([name, Blender])}
+        _ -> Blender
+      end
+
+    {blender, opts} = Keyword.pop(opts, :blender, default_blender)
 
     {blender, blender_opts} =
       case blender do
