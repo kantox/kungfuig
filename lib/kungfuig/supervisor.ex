@@ -30,6 +30,9 @@ defmodule Kungfuig.Supervisor do
 
     blender_name = Keyword.get(blender_opts, :name, blender)
 
+    manager_name =
+      if is_atom(blender_name), do: Module.concat([blender_name, Manager]), else: Manager
+
     {workers, opts} =
       Keyword.pop(
         opts,
@@ -55,7 +58,7 @@ defmodule Kungfuig.Supervisor do
 
     children = [
       {blender, blender_opts},
-      {Manager, post_mortem: pid}
+      {Manager, manager: manager_name, post_mortem: pid}
     ]
 
     Supervisor.init(children, Keyword.put_new(opts, :strategy, :one_for_one))
