@@ -71,6 +71,7 @@ defmodule Kungfuig do
       def start_link(opts) do
         opts = Keyword.merge(unquote(opts), opts)
 
+        {name, opts} = Keyword.pop(opts, :name, __MODULE__)
         {start_options, opts} = Keyword.pop(opts, :start_options, [])
 
         opts =
@@ -90,7 +91,7 @@ defmodule Kungfuig do
         start_options =
           if unquote(anonymous),
             do: Keyword.delete(start_options, :name),
-            else: Keyword.put_new(start_options, :name, __MODULE__)
+            else: Keyword.put_new(start_options, :name, name)
 
         GenServer.start_link(__MODULE__, %Kungfuig{__meta__: opts}, start_options)
       end
