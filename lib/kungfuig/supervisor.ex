@@ -16,7 +16,7 @@ defmodule Kungfuig.Supervisor do
 
     default_blender =
       case name do
-        atom when is_atom(atom) -> {Blender, name: Module.concat([name, Blender])}
+        atom when is_atom(atom) -> {Blender, name: Module.concat([name, "Blender"])}
         _ -> Blender
       end
 
@@ -31,7 +31,7 @@ defmodule Kungfuig.Supervisor do
     blender_name = Keyword.get(blender_opts, :name, blender)
 
     manager_name =
-      if is_atom(blender_name), do: Module.concat([blender_name, Manager]), else: Manager
+      if is_atom(blender_name), do: Module.concat([blender_name, "Manager"]), else: Manager
 
     {workers, opts} =
       Keyword.pop(
@@ -52,13 +52,13 @@ defmodule Kungfuig.Supervisor do
     {:ok, pid} =
       Task.start_link(fn ->
         receive do
-          :ready -> Enum.each(workers, &DynamicSupervisor.start_child(Manager, &1))
+          :ready -> Enum.each(workers, &DynamicSupervisor.start_child(manager_name, &1))
         end
       end)
 
     children = [
       {blender, blender_opts},
-      {Manager, name: manager_name, post_mortem: pid}
+      {Manager, start_options: [name: manager_name], post_mortem: pid}
     ]
 
     Supervisor.init(children, Keyword.put_new(opts, :strategy, :one_for_one))
