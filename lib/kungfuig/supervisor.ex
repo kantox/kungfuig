@@ -58,7 +58,7 @@ defmodule Kungfuig.Supervisor do
 
     children = [
       {blender, blender_opts},
-      {Manager, manager: manager_name, post_mortem: pid}
+      {Manager, name: manager_name, post_mortem: pid}
     ]
 
     Supervisor.init(children, Keyword.put_new(opts, :strategy, :one_for_one))
