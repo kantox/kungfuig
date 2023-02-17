@@ -28,6 +28,8 @@ defmodule Kungfuig.Supervisor do
         {module, opts} -> {module, opts}
       end
 
+    blender_name = Keyword.get(blender_opts, :name, blender)
+
     {workers, opts} =
       Keyword.pop(
         opts,
@@ -38,10 +40,10 @@ defmodule Kungfuig.Supervisor do
     workers =
       Enum.map(workers, fn
         module when is_atom(module) ->
-          {module, callback: {blender, {:call, :updated}}}
+          {module, callback: {blender_name, {:call, :updated}}}
 
         {module, opts} ->
-          {module, [{:callback, {blender, {:call, :updated}}} | opts]}
+          {module, [{:callback, {blender_name, {:call, :updated}}} | opts]}
       end)
 
     {:ok, pid} =

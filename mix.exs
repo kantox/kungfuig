@@ -3,7 +3,7 @@ defmodule Kungfuig.MixProject do
 
   @app :kungfuig
   @name "Kungfuig"
-  @version "0.4.3"
+  @version "0.4.4"
   @owner "kantox"
   @maintainers ["Aleksei Matiushkin"]
   @private_hex ""
