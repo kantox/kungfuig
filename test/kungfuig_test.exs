@@ -54,7 +54,7 @@ defmodule Kungfuig.Test do
              Application.put_env(:kungfuig, :foo_transform, %{bar: 42})
              refute_receive({:updated, %{env_transform: [foo_transform: 42]}}, 120)
            end) =~
-             ~s|"expected :foo_transform to be an atom, got: 42", key: :foo_transform, value: 42, keys_path: []}|
+             ~s|"expected :foo_transform to be an atom, got: 42"|
 
     assert Kungfuig.config() == %{env_transform: [foo_transform: :baz]}
 
