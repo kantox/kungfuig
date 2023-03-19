@@ -6,11 +6,18 @@ defmodule Kungfuig.Blender do
   @spec state :: Kungfuig.t()
   def state, do: GenServer.call(__MODULE__, :state)
 
+  @spec state(GenServer.name()) :: Kungfuig.t()
+  def state(name), do: :persistent_term.get(name, nil) || state()
+
   @impl GenServer
   def handle_call(
         {:updated, %{} = updated},
         _from,
-        %Kungfuig{state: state} = config
-      ),
-      do: {:reply, :ok, %Kungfuig{config | state: Map.merge(state, updated)}}
+        %Kungfuig{__meta__: opts, state: state} = config
+      ) do
+    name = Keyword.get(opts, :name)
+    state = Map.merge(state, updated)
+    unless is_nil(name), do: :persistent_term.put(name, state)
+    {:reply, :ok, %Kungfuig{config | state: state}}
+  end
 end

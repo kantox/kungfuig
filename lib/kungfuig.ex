@@ -36,7 +36,8 @@ defmodule Kungfuig do
 
   @typedoc "The option that can be passed to `start_link/1` function"
   @type option ::
-          {:callback, callback()}
+          {:name, GenServer.name()}
+          | {:callback, callback()}
           | {:interval, non_neg_integer()}
           | {:anonymous, boolean()}
           | {:start_options, [GenServer.option()]}
@@ -52,6 +53,7 @@ defmodule Kungfuig do
   @type t :: %{
           __struct__: Kungfuig,
           __meta__: [option()],
+          __start_options__: [],
           __previous__: config(),
           state: config()
         }
@@ -59,7 +61,7 @@ defmodule Kungfuig do
   defstruct __meta__: [], __previous__: %{}, state: %{}
 
   @doc false
-  @spec __using__(opts :: [option()]) :: tuple()
+  @spec __using__(opts :: [option()]) :: Macro.t()
   defmacro __using__(opts) do
     quote location: :keep, generated: true, bind_quoted: [opts: opts] do
       {anonymous, opts} = Keyword.pop(opts, :anonymous, false)
@@ -71,11 +73,11 @@ defmodule Kungfuig do
       def start_link(opts) do
         opts = Keyword.merge(unquote(opts), opts)
 
-        {name, opts} = Keyword.pop(opts, :name, __MODULE__)
         {start_options, opts} = Keyword.pop(opts, :start_options, [])
 
         opts =
           opts
+          |> Keyword.put_new(:name, __MODULE__)
           |> Keyword.put_new(:imminent, false)
           |> Keyword.put_new(:interval, 1_000)
           |> Keyword.put_new(:validator, Kungfuig.Validators.Void)
@@ -91,7 +93,7 @@ defmodule Kungfuig do
         start_options =
           if unquote(anonymous),
             do: Keyword.delete(start_options, :name),
-            else: Keyword.put_new(start_options, :name, name)
+            else: Keyword.put_new(start_options, :name, Keyword.fetch!(opts, :name))
 
         GenServer.start_link(__MODULE__, %Kungfuig{__meta__: opts}, start_options)
       end
@@ -180,7 +182,7 @@ defmodule Kungfuig do
           GenServer.call(pid, :state)
 
         other ->
-          raise inspect(other, label: "No Blender configured: ")
+          raise inspect(other, label: "No Blender configured")
       end
 
     case which do
