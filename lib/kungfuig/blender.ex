@@ -3,11 +3,9 @@ defmodule Kungfuig.Blender do
 
   use Kungfuig, imminent: true
 
-  @spec state :: Kungfuig.t()
-  def state, do: GenServer.call(__MODULE__, :state)
-
   @spec state(GenServer.name()) :: Kungfuig.t()
-  def state(name), do: :persistent_term.get(name, nil) || state()
+  def state(name \\ __MODULE__),
+    do: :persistent_term.get(name, nil) || GenServer.call(name, :state)
 
   @impl GenServer
   def handle_call(

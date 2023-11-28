@@ -9,6 +9,7 @@ defmodule Kungfuig.Test do
         name: :server_1,
         blender:
           {Kungfuig.Blender,
+           name: Server1Blender,
            interval: 100,
            validator: Kungfuig.Validators.Env,
            callback: {self(), {:info, :updated}}}
