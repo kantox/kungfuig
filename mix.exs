@@ -3,7 +3,7 @@ defmodule Kungfuig.MixProject do
 
   @app :kungfuig
   @name "Kungfuig"
-  @version "0.4.5"
+  @version "1.0.0"
   @owner "kantox"
   @maintainers ["Aleksei Matiushkin"]
   @private_hex ""
@@ -40,7 +40,7 @@ defmodule Kungfuig.MixProject do
 
   defp deps do
     [
-      {:nimble_options, "~> 0.3"},
+      {:nimble_options, "~> 0.3 or ~> 1.0"},
       # dev / test
       {:credo, "~> 1.0", only: [:dev, :ci]},
       {:dialyxir, "~> 1.0", only: [:dev, :test, :ci], runtime: false},

@@ -89,6 +89,7 @@ end
 
 ## Changelog
 
+- **`1.0.0`** — modern Elixir v1.16
 - **`0.4.4`** — fix a bug with hardcoded names (`Supervisor` and `Blender`)
 - **`0.4.2`** — allow `imminent: true` option to `Kungfuig.Backend`
 - **`0.4.0`** — allow named `Kungfuig.Supervisor` (thanks @vbroskas)
